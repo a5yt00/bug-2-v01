@@ -1,0 +1,21 @@
+{
+  "name": "bug-test-poc",
+  "version": "1.0.0",
+  "description": "Proof of concept for bug testing",
+  "main": "bug-test.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "build": "echo 'No build step needed for static HTML'",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "security",
+    "testing",
+    "poc"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
