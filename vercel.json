@@ -1,11 +1,16 @@
 {
   "version": 2,
-  "name": "bug-test-poc",
-  "outputDirectory": ".",
-  "rewrites": [
+  "name": "cors-vulnerability-poc",
+  "builds": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
@@ -23,8 +28,17 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "index.html": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }

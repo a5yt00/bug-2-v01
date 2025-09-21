@@ -1,70 +1,165 @@
-# Bug Test - Hosting Options
+# CORS Vulnerability PoC
 
-This directory contains a proof-of-concept HTML page for testing a specific bug on a target site.
+🔒 **Cross-Origin Resource Sharing (CORS) Misconfiguration Proof of Concept**
 
-## Files
+This repository contains an educational demonstration of a CORS vulnerability where a server incorrectly reflects the `Origin` header in the `Access-Control-Allow-Origin` response header, potentially allowing attackers to read sensitive data from authenticated user sessions.
 
-- `bug-test.html` - The main test page containing the JavaScript code
+## ⚠️ Disclaimer
 
-## Quick Hosting Options
+**This tool is for educational and authorized security testing purposes only.** 
 
-### Option 1: GitHub Pages (Free)
-1. Create a new GitHub repository
-2. Upload `bug-test.html` to the repository
-3. Enable GitHub Pages in repository settings
-4. Access via: `https://yourusername.github.io/repository-name/bug-test.html`
+- Use only on systems you own or have explicit permission to test
+- Do not use for malicious purposes
+- Always follow responsible disclosure practices
+- This is intended for security researchers, developers, and penetration testers
 
-### Option 2: Netlify (Free)
-1. Go to [netlify.com](https://netlify.com)
-2. Drag and drop the `bug-test.html` file
-3. Get instant hosting with a random subdomain
-4. Custom domain available (optional)
+## 🎯 Vulnerability Description
 
-### Option 3: Vercel (Free)
-1. Go to [vercel.com](https://vercel.com)
-2. Import the file or connect to GitHub
-3. Deploy instantly with a custom subdomain
+### What is CORS?
+Cross-Origin Resource Sharing (CORS) is a security feature implemented by web browsers that restricts web pages from making requests to a different domain than the one serving the web page.
 
-### Option 4: Local Development Server
-```bash
-# Python 3
-python -m http.server 8000
+### The Vulnerability
+The target server (`experiences.octopus.com`) incorrectly reflects the `Origin` header in the `Access-Control-Allow-Origin` response header. This allows malicious websites to:
 
-# Python 2
-python -m SimpleHTTPServer 8000
+1. Make cross-origin requests with credentials (`credentials: 'include'`)
+2. Read sensitive data from authenticated user sessions
+3. Potentially steal session tokens, user data, or other protected information
 
-# Node.js (if you have http-server installed)
-npx http-server -p 8000
+### Attack Vector
+```javascript
+fetch('https://vulnerable-site.com/api/sensitive-data', {
+  method: 'GET',
+  credentials: 'include'  // Sends cookies/auth headers
+})
 ```
-Then visit: `http://localhost:8000/bug-test.html`
 
-### Option 5: Simple File Hosting
-- **jsfiddle.net** - Paste the HTML content directly
-- **codepen.io** - Create a new pen with the HTML
-- **repl.it** - Upload and run as a web project
+If the server reflects the origin, the browser allows the request and the attacker can read the response.
 
-## Usage Instructions
+## 🚀 Deployment
 
-1. Host the `bug-test.html` file on any of the above platforms
-2. Open the hosted URL in a browser
-3. Click "Run Bug Test" to execute the JavaScript code
-4. Check the console and on-page results for the test output
-5. The test will make a GET request to the target endpoint with credentials included
+### Option 1: Vercel (Recommended)
 
-## Security Note
+1. **Fork this repository** to your GitHub account
+2. **Connect to Vercel:**
+   - Go to [vercel.com](https://vercel.com)
+   - Sign in with your GitHub account
+   - Click "New Project"
+   - Import your forked repository
+   - Deploy with default settings
 
-⚠️ **This is for authorized testing only.** Ensure you have proper permission before testing on any target site.
+3. **Your PoC will be live at:** `https://your-project-name.vercel.app`
 
-## Test Details
+### Option 2: Local Development
 
-The test script:
-- Makes a GET request to `https://nvio.mx/rQwvpWNw6lD4UMsr/Z9XJNOkbFG8xaEqg?ci=poctest`
-- Includes credentials in the request
-- Logs the response status and body
-- Displays results both in the browser console and on the page
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/bug-2-v01.git
+cd bug-2-v01
 
-## Troubleshooting
+# Install dependencies
+npm install
 
-- If you see CORS errors, the target site may not allow cross-origin requests
-- Check browser console for additional error details
-- Ensure you're testing from an HTTPS domain for security reasons
+# Start local server
+npm run dev
+
+# Open http://localhost:3000
+```
+
+### Option 3: Manual Hosting
+
+Simply upload the `index.html` file to any web server that supports static hosting.
+
+## 📁 Project Structure
+
+```
+bug-2-v01/
+├── index.html          # Main PoC page with enhanced UI
+├── package.json        # Node.js dependencies and scripts
+├── vercel.json         # Vercel deployment configuration
+└── README.md           # This file
+```
+
+## 🎨 Features
+
+- **Modern, responsive UI** with gradient backgrounds and animations
+- **Real-time vulnerability testing** with loading states
+- **Detailed error handling** and user feedback
+- **Mobile-friendly design** that works on all devices
+- **Security headers** configured for safe hosting
+- **Educational warnings** and responsible disclosure notices
+
+## 🔧 Technical Details
+
+### Files Created:
+
+1. **`index.html`** - Enhanced PoC with:
+   - Professional styling with CSS gradients and animations
+   - Responsive design for mobile and desktop
+   - Loading states and error handling
+   - Educational content and warnings
+   - Clean, modern interface
+
+2. **`package.json`** - Node.js configuration with:
+   - Project metadata and description
+   - Development scripts for local testing
+   - Serve dependency for local development
+   - Repository and homepage links
+
+3. **`vercel.json`** - Vercel deployment configuration with:
+   - Static site build settings
+   - Security headers (X-Frame-Options, X-XSS-Protection, etc.)
+   - Routing configuration
+   - Runtime settings
+
+## 🛡️ Security Considerations
+
+The deployment includes several security headers:
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+
+## 📝 Usage Instructions
+
+1. **Deploy the PoC** using one of the methods above
+2. **Open the deployed URL** in a web browser
+3. **Click "Test CORS Vulnerability"** to run the test
+4. **Review the results:**
+   - If vulnerable: Sensitive data will be displayed
+   - If patched: Error message will be shown
+
+## 🔍 How It Works
+
+1. The PoC makes a cross-origin request to the target endpoint
+2. It includes credentials (`credentials: 'include'`) to send cookies
+3. It checks if the server reflects the origin in `Access-Control-Allow-Origin`
+4. If reflected, it reads and displays the response data
+5. If not reflected, it shows an error message
+
+## 📚 Educational Value
+
+This PoC demonstrates:
+- How CORS misconfigurations can be exploited
+- The importance of proper CORS configuration
+- How attackers can steal sensitive data
+- Real-world security testing techniques
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## ⚖️ Legal Notice
+
+This tool is provided for educational purposes only. Users are responsible for ensuring they have proper authorization before testing any systems. The authors are not responsible for any misuse of this tool.
+
+---
+
+**Remember: Always use security testing tools responsibly and only on systems you own or have explicit permission to test.**

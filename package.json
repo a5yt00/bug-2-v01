@@ -1,21 +1,33 @@
 {
-  "name": "bug-test-poc",
+  "name": "cors-vulnerability-poc",
   "version": "1.0.0",
-  "description": "Proof of concept for bug testing",
-  "main": "bug-test.html",
+  "description": "CORS Vulnerability Proof of Concept - Educational Security Testing Tool",
+  "main": "index.html",
   "scripts": {
-    "start": "python -m http.server 8000",
-    "build": "echo 'No build step needed for static HTML'",
-    "dev": "python -m http.server 8000"
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000",
+    "build": "echo 'Static site - no build required'",
+    "vercel-build": "echo 'Static site - no build required'"
   },
   "keywords": [
+    "cors",
     "security",
-    "testing",
-    "poc"
+    "vulnerability",
+    "poc",
+    "educational",
+    "pentesting"
   ],
-  "author": "",
+  "author": "Security Researcher",
   "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/bug-2-v01.git"
+  },
+  "homepage": "https://bug-2-v01.vercel.app"
 }
